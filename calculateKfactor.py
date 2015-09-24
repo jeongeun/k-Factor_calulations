@@ -182,8 +182,10 @@ for i in range(8000):
     logBinning.append(logBinning[-1]*1.5)
     if logBinning[-1]> 8000:
         break
+logBinning=range(0,8001,10)
 
-
+NNLO_output=ROOT.TFile("StoredN_NLO_hists.root","recreate")
+NNLO_output.cd()
 #QCD NNLO:
 
 #fewz
@@ -199,7 +201,7 @@ for f in glob.glob("fewz/NNLO.fewz*"):
     if pm==3:
         fewzHistsp.append(h)
 fewzHist=makeBinningV2(fewzHistsp,fewzHistsm)
-
+fewzHist.Write("QCD_NNLO_FEWZ")
 
 
 #QCD NLO:
@@ -214,7 +216,7 @@ for f in glob.glob("fewzNLO/NLO.fewz*"):
     if pm==3:
         fewzNLOHistsp.append(h)
 fewzHistNLO=makeBinningV2(fewzNLOHistsp,fewzNLOHistsm)
-
+fewzHistNLO.Write("QCD_NLO_FEWZ")
 
 
 #LO mcsanc with LO PDF
@@ -228,7 +230,7 @@ for h in mcsancLOLOHists[1:]:
     mcsancLOLOEWhist.Add(mcsancLOLOEWhist,h,1,1)
 mcsancLOLOEWhist=mcsancLOLOEWhist.Rebin(len(binning10)-1,mcsancLOLOEWhist.GetName()+str(id(mcsancLOLOEWhist)),array.array("d",binning10))
 correctBinning(mcsancLOLOEWhist,mcsancLOLOEWhist.GetBinWidth(20))
-
+mcsancLOLOEWhist.Write("QCD_LO_EW_LO_mcsanc")
 mcsancLOLOEWhist.SetLineColor(ROOT.kGreen)
 mcsancLOLOEWhist.Draw("same")
 
@@ -237,16 +239,19 @@ mcsancLOLOEWhist.Draw("same")
 
 
 #LOMG  this is the LO change here
-mgFile=ROOT.TFile("MCh1_MC_W_m_Gen0_to_2999_allbg_no_tau.root","READ")
+mgFile=ROOT.TFile("Wmass.root","READ")
 mgHist=None
-for key in mgFile.GetListOfKeys():
-    if "MC_W_m" in key.GetName():
-        mgHist=mgFile.Get(key.GetName())
+#for key in mgFile.GetListOfKeys():
+    #if "06295cef49794cd580f0563052034260" in key.GetName():
+mgHist=mgFile.Get(mgFile.GetListOfKeys()[0].GetName())
 
 #this is done for 1 fb and ele + mu correct for one only
-mgHist.Scale(1./(2.*1000.))
+#mgHist.Scale(1./(3.*1000.))
+mgHist.Scale(1./(3.))
 mgHistReb_h=mgHist.Rebin(len(binning10)-1,mgHist.GetName()+str(id(mgHist)),array.array("d",binning10))
 mgHistReb_h.SetLineColor(ROOT.kOrange)
+NNLO_output.cd()
+mgHistReb_h.Write("LO_MGpPythia")
 
 
 
@@ -263,7 +268,7 @@ for h in mcsancPhotonLOHists[1:]:
     mcsancPhotonLOEWhist.Add(mcsancPhotonLOEWhist,h,1,1)
 mcsancPhotonLOEWhist=mcsancPhotonLOEWhist.Rebin(len(binning10)-1,mcsancPhotonLOEWhist.GetName()+str(id(mcsancPhotonLOEWhist)),array.array("d",binning10))
 correctBinning(mcsancPhotonLOEWhist,mcsancPhotonLOEWhist.GetBinWidth(20))
-
+mcsancPhotonLOEWhist.Write("QCD_LO_EW_LO_PhotonPDF_mcsanc")
 
 
 
@@ -280,7 +285,7 @@ for h in mcsancPhotonHists[1:]:
     mcsancPhotonEWhist.Add(mcsancPhotonEWhist,h,1,1)
 mcsancPhotonEWhist=mcsancPhotonEWhist.Rebin(len(binning10)-1,mcsancPhotonEWhist.GetName()+str(id(mcsancPhotonEWhist)),array.array("d",binning10))
 correctBinning(mcsancPhotonEWhist,mcsancPhotonEWhist.GetBinWidth(20))
-
+mcsancPhotonEWhist.Write("QCD_LO_EW_NLO_PhotonPDF_tau_mcsanc")
 
 #ele
 mcsancPhotonEleHists=[]
@@ -293,6 +298,7 @@ for h in mcsancPhotonEleHists[1:]:
     mcsancPhotonEleEWhist.Add(mcsancPhotonEleEWhist,h,1,1)
 mcsancPhotonEleEWhist=mcsancPhotonEleEWhist.Rebin(len(binning10)-1,mcsancPhotonEleEWhist.GetName()+str(id(mcsancPhotonEleEWhist)),array.array("d",binning10))
 correctBinning(mcsancPhotonEleEWhist,mcsancPhotonEleEWhist.GetBinWidth(20))
+mcsancPhotonEleEWhist.Write("QCD_LO_EW_NLO_PhotonPDF_ele_mcsanc")
 
 #mu
 mcsancPhotonMuHists=[]
@@ -305,7 +311,7 @@ for h in mcsancPhotonMuHists[1:]:
     mcsancPhotonMuEWhist.Add(mcsancPhotonMuEWhist,h,1,1)
 mcsancPhotonMuEWhist=mcsancPhotonMuEWhist.Rebin(len(binning10)-1,mcsancPhotonMuEWhist.GetName()+str(id(mcsancPhotonMuEWhist)),array.array("d",binning10))
 correctBinning(mcsancPhotonMuEWhist,mcsancPhotonMuEWhist.GetBinWidth(20))
-
+mcsancPhotonMuEWhist.Write("QCD_LO_EW_NLO_PhotonPDF_mu_mcsanc")
 
 ###Draw controll plot
 leg=ROOT.TLegend(0.67,0.67,0.92,0.92)
@@ -411,7 +417,7 @@ k_fakp.Write("k_fakp")
 k_fak_mean.Write("k_fak_mean")
 outFile.Close()
 
-
+NNLO_output.Close()
 raw_input("finished")
 
 
