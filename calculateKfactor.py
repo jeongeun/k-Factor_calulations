@@ -353,14 +353,14 @@ fewzHist=fewzHist.Rebin(len(logBinning)-1,fewzHist.GetName()+str(id(fewzHist)),a
 mgHistReb_h=mgHistReb_h.Rebin(len(logBinning)-1,mgHistReb_h.GetName()+str(id(mgHistReb_h)),array.array("d",logBinning))
 mcsancPhotonEWhist=mcsancPhotonEWhist.Rebin(len(logBinning)-1,mcsancPhotonEWhist.GetName()+str(id(mcsancPhotonEWhist)),array.array("d",logBinning))
 mcsancPhotonLOEWhist=mcsancPhotonLOEWhist.Rebin(len(logBinning)-1,mcsancPhotonLOEWhist.GetName()+str(id(mcsancPhotonLOEWhist)),array.array("d",logBinning))
-
+loHist=mcsancLOLOEWhist
 
 c1=ROOT.TCanvas("c","c",800,800)
 
 
 ew_ratio=getRatio(mcsancPhotonEWhist,mcsancPhotonLOEWhist,name="EW-kfac")
 
-qcd_ratio=getRatio(fewzHist,mgHistReb_h,name="QCD-kfac")
+qcd_ratio=getRatio(fewzHist,loHist,name="QCD-kfac")
 
 
 
@@ -385,8 +385,8 @@ k_fakm.Multiply(fewzHist,ew_ratio,1,1)
 
 k_fakm.SetLineColor(ROOT.kRed)
 
-k_fakm.Divide(k_fakm,mgHistReb_h,1,1)
-k_fakp.Divide(k_fakp,mgHistReb_h,1,1)
+k_fakm.Divide(k_fakm,loHist,1,1)
+k_fakp.Divide(k_fakp,loHist,1,1)
 
 k_fakm.Draw()
 k_fakp.Draw("same")
@@ -396,7 +396,8 @@ uniqueName(k_fak_mean)
 k_fak_mean.Reset()
 k_fak_mean.Add(k_fakp,k_fakm,1,1)
 k_fak_mean.Scale(1./2.)
-
+k_fak_mean.Draw("same")
+#raw_input("finished")
 
 
 leg=ROOT.TLegend(0.67,0.67,0.92,0.92)

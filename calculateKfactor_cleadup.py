@@ -33,11 +33,11 @@ def getRatio(h1,h2,name=None):
 
 def main():
     inputFile=ROOT.TFile("StoredN_NLO_hists.root","read")
-    binning10=range(0,8001,10)
+    binning10=range(0,8001,50)
 
     hists={}
     for h in inputFile.GetKeyNames():
-        hists[h]=inputFile.Get(h)
+        hists[h]=inputFile.Get(h).Rebin(len(binning10)-1,inputFile.Get(h).GetName()+str(id(inputFile.Get(h))),array.array("d",binning10))
         print h
 
     mgFile=ROOT.TFile("Wmass.root","READ")
@@ -45,11 +45,11 @@ def main():
 
     #this is done for 1 fb and ele + mu correct for one only
     #mgHist.Scale(1./(3.*1000.))
-    LO_MGpPythia.Scale(1.)
+    LO_MGpPythia.Scale(1./3.)
     LO_MGpPythiaReb_h=LO_MGpPythia.Rebin(len(binning10)-1,LO_MGpPythia.GetName()+str(id(LO_MGpPythia)),array.array("d",binning10))
     LO_MGpPythiaReb_h.SetLineColor(ROOT.kOrange)
     for lepton in ["ele","tau","mu"]:
-
+        c1=ROOT.TCanvas()
         ew_ratio=getRatio(hists["QCD_LO_EW_NLO_PhotonPDF_%s_mcsanc"%(lepton)],hists["QCD_LO_EW_LO_PhotonPDF_mcsanc"],name="EW-kfac")
         #qcd_ratio=getRatio(hists["QCD_NNLO_FEWZ"],hists["LO_MGpPythia"],name="QCD-kfac")
 
@@ -73,6 +73,12 @@ def main():
         k_fakp.Divide(k_fakp,LO_MGpPythiaReb_h,1,1)
 
         k_fakm.Draw()
+        #cosmetics
+        c1.SetBottomMargin(0.12)
+        k_fakm.SetTitle("")
+        k_fakm.GetXaxis().SetTitle("M_{W} [GeV]")
+        k_fakm.GetYaxis().SetTitleOffset(0.8)
+        k_fakm.GetYaxis().SetTitle("(N)NLO/LO")
         k_fakp.Draw("same")
 
         k_fak_mean=k_fakp.Clone("mean_k_fak")
@@ -82,6 +88,8 @@ def main():
         k_fak_mean.Add(k_fakp,k_fakm,1,1)
         k_fak_mean.Scale(1./2.)
         k_fak_mean.Draw("same")
+        raw_input()
+        c1.SaveAs("kfactor_%s.pdf"%(lepton))
 
         outFile=ROOT.TFile("k_faktors_%s.root"%(lepton),"recreate")
         outFile.cd()
@@ -91,7 +99,7 @@ def main():
         outFile.Close()
 
 
-        raw_input()
+
 
 
 main()
